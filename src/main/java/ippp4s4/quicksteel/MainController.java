@@ -9,16 +9,9 @@ import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
-import javax.xml.transform.Source;
 import java.io.*;
 import java.net.URL;
-import java.nio.Buffer;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.ResourceBundle;
-import java.util.Scanner;
+import java.util.*;
 
 public class MainController implements Initializable {
 
@@ -30,7 +23,7 @@ public class MainController implements Initializable {
     public ComboBox<Integer> vatCount;
     @FXML
     public Button generateBtn;
-    List<Double[]> data = new ArrayList<>();
+    List<List<Double>> data = new ArrayList<>();
     File uploadedFile;
 
     public void openFile(){
@@ -50,20 +43,28 @@ public class MainController implements Initializable {
     public void filterData() throws IOException {
         if(uploadedFile == null || !uploadedFile.exists())
             return;
-
         try {
-            Scanner myReader = new Scanner(uploadedFile);
-            System.out.println(uploadedFile.length());
-            System.out.println(myReader.hasNext());
-            while (myReader.hasNext()) {
-                String data = myReader.next();
-                System.out.println(data);
+            Scanner myReader = new Scanner(new BufferedReader(new FileReader(uploadedFile)));
+            var i = 0;
+            while (myReader.hasNextLine()) {
+                List<String> line = Arrays.stream(myReader.nextLine().split(";")).toList();
+                i++;
+                if(i==1 || i ==2)
+                    continue;
+                line = line.subList(2, 8);
+                List<Double> numericDataLine = new ArrayList<>();
+                line.forEach(mes -> numericDataLine.add(Double.valueOf(mes.replace(',','.'))));
+                data.add(numericDataLine);
             }
             myReader.close();
         } catch (FileNotFoundException e) {
             System.out.println("An error occurred.");
             e.printStackTrace();
         }
+    }
+
+    public void plotData(){
+        
     }
 
     @Override
