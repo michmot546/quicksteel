@@ -1,16 +1,98 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.geometry.Insets?>
-<?import javafx.scene.control.Label?>
-<?import javafx.scene.layout.VBox?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.chart.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
 
-<?import javafx.scene.control.Button?>
-<VBox alignment="CENTER" spacing="20.0" xmlns:fx="http://javafx.com/fxml"
-      fx:controller="ippp4s4.quicksteel.HelloController">
-    <padding>
-        <Insets bottom="20.0" left="20.0" right="20.0" top="20.0"/>
-    </padding>
-
-    <Label fx:id="welcomeText"/>
-    <Button text="Hello!" onAction="#onHelloButtonClick"/>
-</VBox>
+<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="768.0" prefWidth="1280.0" xmlns="http://javafx.com/javafx/17.0.2-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="ippp4s4.quicksteel.MainController">
+   <top>
+      <MenuBar BorderPane.alignment="CENTER">
+        <menus>
+          <Menu mnemonicParsing="false" text="File">
+            <items>
+              <MenuItem mnemonicParsing="false" onAction="#openFile" text="Import" />
+            </items>
+          </Menu>
+          <Menu mnemonicParsing="false" text="Edit">
+            <items>
+              <MenuItem mnemonicParsing="false" text="Delete" />
+            </items>
+          </Menu>
+          <Menu mnemonicParsing="false" text="Help">
+            <items>
+              <MenuItem mnemonicParsing="false" text="About" />
+            </items>
+          </Menu>
+        </menus>
+      </MenuBar>
+   </top>
+   <left>
+      <VBox fillWidth="false" prefHeight="743.0" prefWidth="277.0" BorderPane.alignment="CENTER">
+         <children>
+            <Label text="Parametry">
+               <font>
+                  <Font size="17.0" />
+               </font>
+               <VBox.margin>
+                  <Insets bottom="15.0" top="15.0" />
+               </VBox.margin>
+            </Label>
+            <Label text="Ilość kadzi" />
+            <ComboBox fx:id="vatCount" prefWidth="150.0" promptText="Ilość kadzi">
+               <VBox.margin>
+                  <Insets />
+               </VBox.margin></ComboBox>
+            <HBox prefHeight="32.0" prefWidth="200.0">
+               <children>
+                  <Label text="Czas bezwymiarowy">
+                     <font>
+                        <Font size="17.0" />
+                     </font>
+                  </Label>
+                  <CheckBox fx:id="dTime" alignment="CENTER_RIGHT" mnemonicParsing="false" onAction="#hideDTimeMenu" prefHeight="26.0" prefWidth="26.0">
+                     <padding>
+                        <Insets left="5.0" />
+                     </padding>
+                  </CheckBox>
+               </children>
+               <VBox.margin>
+                  <Insets top="15.0" />
+               </VBox.margin>
+            </HBox>
+            <VBox fx:id="dTimeMenu" disable="true" prefHeight="200.0" prefWidth="245.0">
+               <children>
+                   <Label text="Objętość płynu V [m^3]">
+                     <VBox.margin>
+                        <Insets top="15.0" />
+                     </VBox.margin>
+                  </Label>
+                  <TextField alignment="CENTER" prefHeight="25.0" prefWidth="215.0" />
+                  <Label text="Natężenie przepływu Qv [m^3*s^-1]" />
+                  <TextField alignment="CENTER" prefHeight="25.0" prefWidth="214.0" />
+                  <Label text="Teoretyczny średni czas [s]" />
+                  <TextField alignment="CENTER" disable="true" prefHeight="25.0" prefWidth="214.0" />
+               </children>
+            </VBox>
+            <Button fx:id="generateBtn" mnemonicParsing="false" onAction="#filterData" prefHeight="25.0" prefWidth="245.0" text="Generuj" />
+         </children>
+         <BorderPane.margin>
+            <Insets />
+         </BorderPane.margin>
+         <padding>
+            <Insets left="15.0" />
+         </padding>
+      </VBox>
+   </left>
+   <center>
+      <LineChart BorderPane.alignment="CENTER">
+        <xAxis>
+          <CategoryAxis side="BOTTOM" />
+        </xAxis>
+        <yAxis>
+          <NumberAxis side="LEFT" />
+        </yAxis>
+      </LineChart>
+   </center>
+</BorderPane>
