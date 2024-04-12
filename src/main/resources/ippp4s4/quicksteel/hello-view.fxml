@@ -86,12 +86,12 @@
       </VBox>
    </left>
    <center>
-      <LineChart BorderPane.alignment="CENTER">
+      <LineChart fx:id="chart" BorderPane.alignment="CENTER">
         <xAxis>
-          <CategoryAxis side="BOTTOM" />
+          <NumberAxis minorTickCount="1" side="BOTTOM" tickLabelGap="5.0" tickUnit="1.0" upperBound="95.0" />
         </xAxis>
         <yAxis>
-          <NumberAxis side="LEFT" />
+          <NumberAxis autoRanging="false" minorTickCount="1" side="LEFT" upperBound="1.0" />
         </yAxis>
       </LineChart>
    </center>
