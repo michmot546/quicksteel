@@ -88,10 +88,10 @@
    <center>
       <LineChart fx:id="chart" BorderPane.alignment="CENTER">
         <xAxis>
-          <NumberAxis minorTickCount="1" side="BOTTOM" tickLabelGap="5.0" tickUnit="1.0" upperBound="95.0" />
+          <NumberAxis fx:id="timeAxis" autoRanging="false" side="BOTTOM" tickLabelGap="5.0" />
         </xAxis>
         <yAxis>
-          <NumberAxis autoRanging="false" minorTickCount="1" side="LEFT" upperBound="1.0" />
+          <NumberAxis autoRanging="false" minorTickCount="10" minorTickLength="1.0" minorTickVisible="false" side="LEFT" tickUnit="0.1" upperBound="1.0" />
         </yAxis>
       </LineChart>
    </center>
