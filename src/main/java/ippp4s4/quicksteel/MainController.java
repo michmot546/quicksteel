@@ -1,6 +1,10 @@
 package ippp4s4.quicksteel;
 
+import javafx.beans.InvalidationListener;
+import javafx.beans.Observable;
 import javafx.beans.property.ObjectProperty;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.Node;
@@ -8,10 +12,7 @@ import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart.Data;
 import javafx.scene.chart.XYChart.Series;
-import javafx.scene.control.Button;
-import javafx.scene.control.CheckBox;
-import javafx.scene.control.ComboBox;
-import javafx.scene.control.Label;
+import javafx.scene.control.*;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.scene.shape.Circle;
@@ -37,9 +38,18 @@ public class MainController implements Initializable {
     @FXML
     public Button generateBtn;
     @FXML
-    public LineChart chart;
+    public LineChart<Double, Double> chart;
     @FXML
     public NumberAxis timeAxis;
+    @FXML
+    public NumberAxis conductivityAxis;
+    @FXML
+    public TextField vFluid;
+    @FXML
+    public TextField qFluid;
+    @FXML
+    public TextField avgTime;
+
 
     ArrayList<ArrayList<Double>> data = new ArrayList<>();
     File uploadedFile;
@@ -51,16 +61,52 @@ public class MainController implements Initializable {
         FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter("Plik z pomiarami (*.csv)", "*.csv");
         chooser.getExtensionFilters().add(extFilter);
         uploadedFile = chooser.showOpenDialog(new Stage());
+
+        ButtonBlockSet();
+    }
+
+    public void ButtonBlockSet(){
+        this.generateBtn.setDisable(!conditionsForBtnUnlockMet());
+    }
+
+    private double calculateTheoreticalAvgTime(double v, double q){
+        return v/q;
+    }
+
+    private boolean conditionsForBtnUnlockMet(){
+        boolean conditionWithDTime = false;
+        if(dTime.isSelected()){
+            if(vFluid.getText().isEmpty() || qFluid.getText().isEmpty()){
+                conditionWithDTime = false;
+            }
+            else {
+                conditionWithDTime = true;
+                var v = Double.valueOf(vFluid.getText());
+                var q = Double.valueOf(qFluid.getText());
+                if(v == 0 || q == 0)
+                    avgTime.setText("");
+                else
+                    avgTime.setText(calculateTheoreticalAvgTime(v, q) + "");
+            }
+        }
+        else{
+            conditionWithDTime = true;
+        }
+
+        return this.uploadedFile != null && conditionWithDTime;
     }
 
     public void hideDTimeMenu() {
         var isOpen = dTime.isSelected();
         dTimeMenu.setDisable(!isOpen);
+        generateBtn.setDisable(!conditionsForBtnUnlockMet());
     }
 
     public void filterData() throws IOException {
-        if (uploadedFile == null || !uploadedFile.exists())
+        if(!conditionsForBtnUnlockMet() || !uploadedFile.exists()){
+            generateBtn.setDisable(true);
             return;
+        }
         data.clear();
         for (var vat = 0; vat < vatCount.getValue(); vat++) {
             data.add(new ArrayList<>());
@@ -85,7 +131,6 @@ public class MainController implements Initializable {
             System.out.println("Data format error");
         } catch (FileNotFoundException e) {
             System.out.println("An error occurred.");
-            e.printStackTrace();
         }
         CalculateDimensionlessConcetration();
         plotData();
@@ -119,26 +164,32 @@ public class MainController implements Initializable {
 
         AtomicReference<BigDecimal> time = new AtomicReference<>(BigDecimal.ZERO);
         for (var vat = 0; vat < vatCount.getValue(); vat++) {
-            Series series = new Series();
-            series.setName("Kadź " + (vat + 1));
+            Series<Double, Double> series = new Series<>();
+            series.setName("Wylew " + (vat + 1));
             time.set(BigDecimal.ZERO);
             data.get(vat).forEach(mes -> {
                 BigDecimal increment = new BigDecimal("0.3");
                 time.set(time.get().add(increment));
-                var point = new Data<Number, Number>(time.get(), mes);
+                var point = new Data<Double, Double>(time.get().doubleValue(), mes);
                 point.setNode(createSmallNode());
                 series.getData().add(point);
             });
             chart.getData().add(series);
         }
-
+        conductivityAxis.setLabel("Stężenie bezwymiarowe");
         timeAxis.setUpperBound(Math.floor(time.get().doubleValue() + timeAxis.getTickUnit()));
+        if(dTime.isSelected()){
+            timeAxis.setLabel("Czas bezwymiarowy");
+        }
+        else{
+            timeAxis.setLabel("Czas [s]");
+        }
     }
 
     private void createHelpSeries(){
-        Series series = new Series();
-        var point = new Data<>(-1, 0.8);
-        series.getData().addAll(point, new Data<>(200f, 0.8f));
+        Series<Double, Double> series = new Series<>();
+        var point = new Data<Double, Double>(-1.0, 0.8);
+        series.getData().addAll(point, new Data<Double, Double>(200.0, 0.8));
         series.setName("0.8");
         chart.getData().add(series);
 
@@ -166,7 +217,6 @@ public class MainController implements Initializable {
 
         label.translateXProperty().bind(label.widthProperty().divide(0.4));
         label.translateYProperty().bind(label.heightProperty().divide(-1.3));
-
         return pane;
     }
 
@@ -174,5 +224,75 @@ public class MainController implements Initializable {
     public void initialize(URL url, ResourceBundle resourceBundle) {
         vatCount.getItems().setAll(1, 2, 3, 4, 5, 6);
         vatCount.setValue(4);
+
+        vFluid.textProperty().addListener(new CharacterValidator(vFluid));
+        vFluid.focusedProperty().addListener(new NumberValidator(vFluid));
+
+        qFluid.textProperty().addListener(new CharacterValidator(qFluid));
+        qFluid.focusedProperty().addListener(new NumberValidator(qFluid));
+    }
+
+    private class CharacterValidator implements ChangeListener<String>{
+        private TextField field;
+        public CharacterValidator(TextField textField){
+            this.field = textField;
+        }
+        @Override
+        public void changed(ObservableValue<? extends String> observableValue, String oldValue, String newValue) {
+            if (!newValue.matches("^[0-9.]+$") && !newValue.isEmpty()) {
+                field.setText(oldValue);
+            }
+        }
+    }
+    private class NumberValidator implements ChangeListener<Boolean>{
+        private TextField field;
+        public NumberValidator(TextField textField){
+            this.field = textField;
+        }
+        @Override
+        public void changed(ObservableValue<? extends Boolean> observableValue, Boolean oldPropertyValue, Boolean newPropertyValue) {
+            //TextField is out of focus
+            if (!newPropertyValue)
+            {
+                var textToValidate = field.getText().trim();
+
+                if(textToValidate.equals("0") || textToValidate.isEmpty()){
+                    field.clear();
+                    return;
+                }
+
+                if(textToValidate.length() > 10)
+                    textToValidate = textToValidate.substring(0, 10);
+
+                textToValidate = removeMoreThanOneOccurence(textToValidate, '.');
+
+                if(textToValidate.endsWith(".")){
+                    textToValidate = textToValidate.replace(".", "");
+                }
+
+                if(textToValidate.startsWith(".")){
+                    textToValidate = "0" + textToValidate;
+                }
+
+                textToValidate = new BigDecimal(textToValidate).stripTrailingZeros().toString();
+
+                field.setText(textToValidate);
+                ButtonBlockSet();
+            }
+        }
+    }
+    // Method to count occurrences of a character in a string
+    private String removeMoreThanOneOccurence(String str, char targetChar) {
+        // Split the input string into two parts at the first dot
+        String[] parts = str.split("\\.", 2); // Limit the split to 2 parts
+        // If there was a dot in the input
+        if (parts.length > 1) {
+            // Concatenate the first part (before the dot) with the second part (after the dot)
+            String result = parts[0] + "." + parts[1].replaceAll("\\.", "");
+            return result;
+        } else {
+            // No dot found, use the original input
+            return str;
+        }
     }
 }

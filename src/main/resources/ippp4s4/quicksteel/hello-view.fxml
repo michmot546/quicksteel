@@ -6,7 +6,7 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.*?>
 
-<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="768.0" prefWidth="1280.0" xmlns="http://javafx.com/javafx/17.0.2-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="ippp4s4.quicksteel.MainController">
+<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" onMouseClicked="#ButtonBlockSet" prefHeight="768.0" prefWidth="1280.0" xmlns="http://javafx.com/javafx/17.0.2-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="ippp4s4.quicksteel.MainController">
    <top>
       <MenuBar BorderPane.alignment="CENTER">
         <menus>
@@ -39,43 +39,35 @@
                   <Insets bottom="15.0" top="15.0" />
                </VBox.margin>
             </Label>
-            <Label text="Ilość kadzi" />
-            <ComboBox fx:id="vatCount" prefWidth="150.0" promptText="Ilość kadzi">
+            <Label text="Ilość wylewów" />
+            <ComboBox fx:id="vatCount" prefWidth="150.0">
                <VBox.margin>
                   <Insets />
                </VBox.margin></ComboBox>
             <HBox prefHeight="32.0" prefWidth="200.0">
                <children>
-                  <Label text="Czas bezwymiarowy">
-                     <font>
-                        <Font size="17.0" />
-                     </font>
-                  </Label>
-                  <CheckBox fx:id="dTime" alignment="CENTER_RIGHT" mnemonicParsing="false" onAction="#hideDTimeMenu" prefHeight="26.0" prefWidth="26.0">
+                  <Label text="Czas bezwymiarowy" />
+                  <CheckBox fx:id="dTime" alignment="CENTER_RIGHT" mnemonicParsing="false" onAction="#hideDTimeMenu" prefHeight="17.0" prefWidth="26.0">
                      <padding>
                         <Insets left="5.0" />
                      </padding>
                   </CheckBox>
                </children>
                <VBox.margin>
-                  <Insets top="15.0" />
+                  <Insets top="10.0" />
                </VBox.margin>
             </HBox>
             <VBox fx:id="dTimeMenu" disable="true" prefHeight="200.0" prefWidth="245.0">
                <children>
-                   <Label text="Objętość płynu V [m^3]">
-                     <VBox.margin>
-                        <Insets top="15.0" />
-                     </VBox.margin>
-                  </Label>
-                  <TextField alignment="CENTER" prefHeight="25.0" prefWidth="215.0" />
+                  <Label text="Objętość płynu V [m^3]" />
+                  <TextField fx:id="vFluid" alignment="CENTER" prefHeight="25.0" prefWidth="215.0" />
                   <Label text="Natężenie przepływu Qv [m^3*s^-1]" />
-                  <TextField alignment="CENTER" prefHeight="25.0" prefWidth="214.0" />
+                  <TextField fx:id="qFluid" alignment="CENTER" prefHeight="25.0" prefWidth="215.0" />
                   <Label text="Teoretyczny średni czas [s]" />
-                  <TextField alignment="CENTER" disable="true" prefHeight="25.0" prefWidth="214.0" />
+                  <TextField fx:id="avgTime" alignment="CENTER" disable="true" prefHeight="25.0" prefWidth="215.0" />
                </children>
             </VBox>
-            <Button fx:id="generateBtn" mnemonicParsing="false" onAction="#filterData" prefHeight="25.0" prefWidth="245.0" text="Generuj" />
+            <Button fx:id="generateBtn" disable="true" mnemonicParsing="false" onAction="#filterData" prefHeight="25.0" prefWidth="245.0" text="Generuj" />
          </children>
          <BorderPane.margin>
             <Insets />
@@ -91,7 +83,7 @@
           <NumberAxis fx:id="timeAxis" autoRanging="false" side="BOTTOM" tickLabelGap="5.0" />
         </xAxis>
         <yAxis>
-          <NumberAxis autoRanging="false" minorTickCount="10" minorTickLength="1.0" minorTickVisible="false" side="LEFT" tickUnit="0.1" upperBound="1.0" />
+          <NumberAxis fx:id="conductivityAxis" autoRanging="false" minorTickCount="10" minorTickLength="1.0" minorTickVisible="false" side="LEFT" tickUnit="0.1" upperBound="1.0" />
         </yAxis>
       </LineChart>
    </center>
