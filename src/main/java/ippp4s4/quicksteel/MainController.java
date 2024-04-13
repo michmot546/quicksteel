@@ -1,20 +1,25 @@
 package ippp4s4.quicksteel;
 
-import javafx.beans.InvalidationListener;
-import javafx.beans.Observable;
+import ippp4s4.quicksteel.model.Legend;
+import ippp4s4.quicksteel.model.LegendItem;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.scene.Cursor;
 import javafx.scene.Node;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart.Data;
 import javafx.scene.chart.XYChart.Series;
 import javafx.scene.control.*;
+import javafx.scene.input.MouseButton;
 import javafx.scene.layout.Pane;
+import javafx.scene.layout.TilePane;
 import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
+import javafx.scene.paint.Paint;
 import javafx.scene.shape.Circle;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
@@ -49,7 +54,10 @@ public class MainController implements Initializable {
     public TextField qFluid;
     @FXML
     public TextField avgTime;
+    @FXML
+    public Legend legend;
 
+    private List<Color> chartColors = Arrays.asList(Color.PURPLE, Color.GREEN, Color.BLUE, Color.ORANGE, Color.RED, Color.PINK);
 
     ArrayList<ArrayList<Double>> data = new ArrayList<>();
     File uploadedFile;
@@ -169,7 +177,7 @@ public class MainController implements Initializable {
             data.get(vat).forEach(mes -> {
                 time.set(time.get().add(new BigDecimal("0.3")));
                 var point = new Data<Double, Double>(time.get().doubleValue(), mes);
-                point.setNode(createSmallNode(2));
+                point.setNode(createSmallNode(0));
                 series.getData().add(point);
             });
             allSeries.add(series);
@@ -177,9 +185,8 @@ public class MainController implements Initializable {
         conductivityAxis.setLabel("Stężenie bezwymiarowe");
 
         var processTime = Math.floor(time.get().doubleValue() + timeAxis.getTickUnit());
-        var dimentionlessTimeStep = 0.3d / Double.parseDouble(avgTime.getText());
-
         if(dTime.isSelected()){
+            var dimentionlessTimeStep = 0.3d / Double.parseDouble(avgTime.getText());
             for(var doubleSeries : allSeries){
                 var increment = 0d;
                 for(var point : doubleSeries.getData()){
@@ -188,18 +195,38 @@ public class MainController implements Initializable {
                 }
             }
             timeAxis.setUpperBound(dimentionlessTimeStep * allSeries.get(0).getData().size());
-            timeAxis.setTickUnit(0.1);
+            timeAxis.setTickUnit(0.2);
         }
         else {
             timeAxis.setUpperBound(processTime);
             timeAxis.setTickUnit(5d);
         }
 
-
         createHorizontalHelpSeries(0d, processTime, 0.8d, "0.8");
         createHorizontalHelpSeries(0d, processTime, 0.2d, "0.2");
+        Set<Node> hrNodes = chart.lookupAll(".series0");
+        for (Node n : hrNodes) {
+            n.setStyle("-fx-stroke: darkred;");
+        }
+        hrNodes = chart.lookupAll(".series1");
+        for (Node n : hrNodes) {
+            n.setStyle("-fx-stroke: darkred;");
+        }
 
-        chart.getData().addAll(allSeries);
+        legend.clear();
+        for(var i = 0; i < allSeries.size(); i++) {
+            chart.getData().add(allSeries.get(i));
+            legend.addLegendItem(new LegendItem(chart.getData().get(chart.getData().size() - 1), chartColors.get(i), true));
+            chart.applyCss();
+            Set<Node> nodes = chart.lookupAll(".series" + (i + 2));
+            String rgb = String.format("%d, %d, %d",
+                    (int) (chartColors.get(i).getRed() * 255),
+                    (int) (chartColors.get(i).getGreen() * 255),
+                    (int) (chartColors.get(i).getBlue() * 255));
+            for (Node n : nodes) {
+                n.setStyle("-fx-stroke: rgba(" + rgb + ", 1.0);");
+            }
+        }
 
         if(dTime.isSelected()){
             timeAxis.setLabel("Czas bezwymiarowy");
@@ -207,8 +234,12 @@ public class MainController implements Initializable {
         else{
             timeAxis.setLabel("Czas [s]");
         }
+        setLegendClickable();
     }
 
+    private void setLegendClickable() {
+
+    }
     private void createHorizontalHelpSeries(double start, double end, double y, String name){
         Series<Double, Double> series = new Series<>();
         var point = new Data<Double, Double>(start, y);

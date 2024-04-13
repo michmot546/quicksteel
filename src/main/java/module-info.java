@@ -12,4 +12,7 @@ module ippp4s4.quicksteel {
 
     opens ippp4s4.quicksteel to javafx.fxml;
     exports ippp4s4.quicksteel;
+
+    opens ippp4s4.quicksteel.model to javafx.fxml;
+    exports ippp4s4.quicksteel.model;
 }

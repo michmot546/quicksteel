@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import ippp4s4.quicksteel.model.*?>
 <?import javafx.geometry.*?>
 <?import javafx.scene.chart.*?>
 <?import javafx.scene.control.*?>
@@ -78,13 +79,18 @@
       </VBox>
    </left>
    <center>
-      <LineChart fx:id="chart" BorderPane.alignment="CENTER">
-        <xAxis>
-          <NumberAxis fx:id="timeAxis" autoRanging="false" side="BOTTOM" tickLabelGap="5.0" />
-        </xAxis>
-        <yAxis>
-          <NumberAxis fx:id="conductivityAxis" autoRanging="false" minorTickCount="10" minorTickLength="1.0" minorTickVisible="false" side="LEFT" tickUnit="0.1" upperBound="1.0" />
-        </yAxis>
-      </LineChart>
+      <VBox prefHeight="200.0" prefWidth="100.0" BorderPane.alignment="CENTER">
+         <children>
+            <LineChart fx:id="chart" createSymbols="false" legendVisible="false" prefHeight="687.0" prefWidth="1003.0">
+              <xAxis>
+                <NumberAxis fx:id="timeAxis" autoRanging="false" side="BOTTOM" tickLabelGap="5.0" />
+              </xAxis>
+              <yAxis>
+                <NumberAxis fx:id="conductivityAxis" autoRanging="false" minorTickCount="10" minorTickLength="1.0" minorTickVisible="false" side="LEFT" tickUnit="0.1" upperBound="1.0" />
+              </yAxis>
+            </LineChart>
+             <Legend fx:id="legend" alignment="CENTER" />
+         </children>
+      </VBox>
    </center>
 </BorderPane>
