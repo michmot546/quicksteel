@@ -160,24 +160,47 @@ public class MainController implements Initializable {
 
     private void plotData() {
         chart.getData().clear();
-        createHelpSeries();
-
+        var allSeries = new ArrayList<Series<Double, Double>>();
         AtomicReference<BigDecimal> time = new AtomicReference<>(BigDecimal.ZERO);
         for (var vat = 0; vat < vatCount.getValue(); vat++) {
             Series<Double, Double> series = new Series<>();
             series.setName("Wylew " + (vat + 1));
             time.set(BigDecimal.ZERO);
             data.get(vat).forEach(mes -> {
-                BigDecimal increment = new BigDecimal("0.3");
-                time.set(time.get().add(increment));
+                time.set(time.get().add(new BigDecimal("0.3")));
                 var point = new Data<Double, Double>(time.get().doubleValue(), mes);
-                point.setNode(createSmallNode());
+                point.setNode(createSmallNode(2));
                 series.getData().add(point);
             });
-            chart.getData().add(series);
+            allSeries.add(series);
         }
         conductivityAxis.setLabel("Stężenie bezwymiarowe");
-        timeAxis.setUpperBound(Math.floor(time.get().doubleValue() + timeAxis.getTickUnit()));
+
+        var processTime = Math.floor(time.get().doubleValue() + timeAxis.getTickUnit());
+        var dimentionlessTimeStep = 0.3d / Double.parseDouble(avgTime.getText());
+
+        if(dTime.isSelected()){
+            for(var doubleSeries : allSeries){
+                var increment = 0d;
+                for(var point : doubleSeries.getData()){
+                    point.setXValue(increment);
+                    increment += dimentionlessTimeStep;
+                }
+            }
+            timeAxis.setUpperBound(dimentionlessTimeStep * allSeries.get(0).getData().size());
+            timeAxis.setTickUnit(0.1);
+        }
+        else {
+            timeAxis.setUpperBound(processTime);
+            timeAxis.setTickUnit(5d);
+        }
+
+
+        createHorizontalHelpSeries(0d, processTime, 0.8d, "0.8");
+        createHorizontalHelpSeries(0d, processTime, 0.2d, "0.2");
+
+        chart.getData().addAll(allSeries);
+
         if(dTime.isSelected()){
             timeAxis.setLabel("Czas bezwymiarowy");
         }
@@ -186,23 +209,20 @@ public class MainController implements Initializable {
         }
     }
 
-    private void createHelpSeries(){
+    private void createHorizontalHelpSeries(double start, double end, double y, String name){
         Series<Double, Double> series = new Series<>();
-        var point = new Data<Double, Double>(-1.0, 0.8);
-        series.getData().addAll(point, new Data<Double, Double>(200.0, 0.8));
-        series.setName("0.8");
+        var point = new Data<Double, Double>(start, y);
+        var point2 = new Data<Double, Double>(end, y);
+        point.setNode(createSmallNode(1));
+        point2.setNode(createSmallNode(1));
+        series.getData().addAll(point, point2);
+        series.setName(name);
         chart.getData().add(series);
-
-        Series series2 = new Series();
-        var point2 = new Data<>(-1, 0.2);
-        series2.getData().addAll(point2, new Data<>(200f, 0.2f));
-        series2.setName("0.2");
-        chart.getData().add(series2);
     }
 
-    private Node createSmallNode(){
+    private Node createSmallNode(double size){
         var pane = new Pane();
-        pane.setShape(new Circle(2.0));
+        pane.setShape(new Circle(size));
         pane.setScaleShape(false);
         return pane;
     }
