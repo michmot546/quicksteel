@@ -11,9 +11,14 @@
    <top>
       <MenuBar BorderPane.alignment="CENTER">
         <menus>
-          <Menu mnemonicParsing="false" text="File">
+          <Menu mnemonicParsing="false" text="Plik">
             <items>
               <MenuItem mnemonicParsing="false" onAction="#openFile" text="Import" />
+                  <Menu mnemonicParsing="false" text="Eksport">
+                    <items>
+                      <MenuItem mnemonicParsing="false" onAction="#saveAsPng" text="Plik graficzny" />
+                    </items>
+                  </Menu>
             </items>
           </Menu>
           <Menu mnemonicParsing="false" text="Edit">

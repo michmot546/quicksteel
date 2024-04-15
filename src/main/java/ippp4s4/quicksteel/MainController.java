@@ -1,19 +1,23 @@
 package ippp4s4.quicksteel;
 
+import com.google.common.io.Files;
 import ippp4s4.quicksteel.model.Legend;
 import ippp4s4.quicksteel.model.LegendItem;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.embed.swing.SwingFXUtils;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.Cursor;
 import javafx.scene.Node;
+import javafx.scene.SnapshotParameters;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart.Data;
 import javafx.scene.chart.XYChart.Series;
 import javafx.scene.control.*;
+import javafx.scene.image.WritableImage;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.TilePane;
@@ -21,9 +25,11 @@ import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
 import javafx.scene.shape.Circle;
+import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
+import javax.imageio.ImageIO;
 import java.io.*;
 import java.math.BigDecimal;
 import java.net.URL;
@@ -33,7 +39,6 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class MainController implements Initializable {
-
     @FXML
     public CheckBox dTime;
     @FXML
@@ -234,11 +239,27 @@ public class MainController implements Initializable {
         else{
             timeAxis.setLabel("Czas [s]");
         }
-        setLegendClickable();
     }
 
-    private void setLegendClickable() {
+    public void saveAsPng() {
+        FileChooser fileChooser = new FileChooser();
 
+        //Set extension filter for text files
+        FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter("Pliki graficzne (*.png, *.jpg)", "*.png", "*.jpg");
+        fileChooser.getExtensionFilters().add(extFilter);
+        fileChooser.setInitialFileName("wykres.png");
+
+        //Show save file dialog
+        File file = fileChooser.showSaveDialog(new Stage());
+
+        if (file != null) {
+            WritableImage image = chart.snapshot(new SnapshotParameters(), null);
+            try {
+                ImageIO.write(SwingFXUtils.fromFXImage(image, null), Files.getFileExtension(file.getName()), file);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
     }
     private void createHorizontalHelpSeries(double start, double end, double y, String name){
         Series<Double, Double> series = new Series<>();
