@@ -39,6 +39,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicReference;
 import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 public class MainController implements Initializable {
@@ -243,27 +244,42 @@ public class MainController implements Initializable {
             timeAxis.setLabel("Czas [s]");
         }
     }
-    public void saveAsExel(){
+    public void saveAsExcel(){
         Workbook workbook = new XSSFWorkbook();
         Sheet sheet = workbook.createSheet("Dane wykresu");
 
         ObservableList<Series<Double, Double>> chartData = chart.getData();
 
-        int rowNum = 0;
-        for (Series<Double, Double> series : chartData) {
-            Row row = sheet.createRow(rowNum++);
-            row.createCell(0).setCellValue(series.getName());
+        //cleanup
+        List<String> seriesToRemove = Arrays.asList("0.2", "0.8");
+        chartData.removeIf(series -> seriesToRemove.contains(series.getName()));
 
-            int colNum = 1;
+        //make row with series names
+        Row firstrow = sheet.createRow(0);
+        int seriesNum = 0;
+        for(Series<Double, Double> series : chartData) {
+            firstrow.createCell(seriesNum).setCellValue(series.getName());
+            seriesNum++;
+        }
+
+        int colNum = 0;
+        for (Series<Double, Double> series : chartData) {
+            int rowNum = 1;
             for (Data<Double, Double> data : series.getData()) {
-                row.createCell(colNum++).setCellValue(data.getYValue());
+                Row row = sheet.getRow(rowNum);
+                if (row == null) {
+                    row = sheet.createRow(rowNum);
+                }
+                row.createCell(colNum).setCellValue(data.getYValue());
+                rowNum++;
             }
+            colNum++;
         }
 
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Zapisz jako arkusz kalkulacyjny");
         fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Arkusz kalkulacyjny", "*.xlsx"));
-        fileChooser.setInitialFileName("DaneWylewów.xlsx");
+        fileChooser.setInitialFileName("Wylew.xlsx");
 
         File file = fileChooser.showSaveDialog(new Stage());
 
@@ -283,6 +299,48 @@ public class MainController implements Initializable {
             }
         }
     }
+
+    public void saveAsCSV() {
+        char rowDelimiter = ';';
+        ObservableList<Series<Double, Double>> chartData = chart.getData();
+
+        //cleanup
+        List<String> seriesToRemove = Arrays.asList("0.2", "0.8");
+        chartData.removeIf(series -> seriesToRemove.contains(series.getName()));
+
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Zapisz jako CSV");
+        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("CSV", "*.csv"));
+        fileChooser.setInitialFileName("Wylew.csv");
+
+        File file = fileChooser.showSaveDialog(new Stage());
+
+        if (file != null) {
+            try (BufferedWriter writer = new BufferedWriter(new FileWriter(file))) {
+                //make row with series names
+                for (Series<Double, Double> series : chartData) {
+                    writer.write(series.getName() + rowDelimiter);
+                }
+                writer.newLine();
+
+                //make rows with series data
+                int maxDataPoints = chartData.stream().mapToInt(series -> series.getData().size()).max().orElse(0);
+                for (int i = 0; i < maxDataPoints; i++) {
+                    for (Series<Double, Double> series : chartData) {
+                        Data<Double, Double> data = series.getData().get(i);
+                        writer.write(data.getYValue() + Character.toString(rowDelimiter));
+                    }
+                    writer.newLine();
+                }
+
+                System.out.println("Plik CSV utworzony!");
+            } catch (IOException e) {
+                e.printStackTrace();
+                System.out.println("Error :)");
+            }
+        }
+    }
+
     public void saveAsPng() {
         FileChooser fileChooser = new FileChooser();
 
