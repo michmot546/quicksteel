@@ -326,7 +326,7 @@ public class MainController implements Initializable {
         if (file != null) {
             try (BufferedWriter writer = new BufferedWriter(new FileWriter(file))) {
                 // Make header row with series names
-                writer.write(chartData.get(0).getName() + rowDelimiter); // x-axis name
+                writer.write(chart.getXAxis().getLabel() + rowDelimiter); // x-axis name
                 for (Series<Double, Double> series : chartData) {
                     writer.write(series.getName() + rowDelimiter); // y-axis names
                 }
@@ -337,7 +337,7 @@ public class MainController implements Initializable {
                 for (int i = 0; i < maxDataPoints; i++) {
                     // x-axis values
                     Data<Double, Double> xData = chartData.get(0).getData().get(i);
-                    writer.write(xData.getXValue() + Character.toString(rowDelimiter));
+                    writer.write(String.format("%.2f", xData.getXValue()) + Character.toString(rowDelimiter));
 
                     // y-axis values
                     for (Series<Double, Double> series : chartData) {
