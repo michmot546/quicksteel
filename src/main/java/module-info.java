@@ -11,6 +11,8 @@ module ippp4s4.quicksteel {
     requires eu.hansolo.tilesfx;
     requires javafx.swing;
     requires com.google.common;
+    requires org.apache.poi.poi;
+    requires org.apache.poi.ooxml;
 
     opens ippp4s4.quicksteel to javafx.fxml;
     exports ippp4s4.quicksteel;

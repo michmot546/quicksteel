@@ -17,6 +17,7 @@
                   <Menu mnemonicParsing="false" text="Eksport">
                     <items>
                       <MenuItem mnemonicParsing="false" onAction="#saveAsPng" text="Plik graficzny" />
+                        <MenuItem mnemonicParsing="false" onAction="#saveAsExel" text="Plik exel" />
                     </items>
                   </Menu>
             </items>
