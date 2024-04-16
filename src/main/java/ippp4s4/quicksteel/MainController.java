@@ -243,61 +243,10 @@ public class MainController implements Initializable {
             timeAxis.setLabel("Czas [s]");
         }
     }
-    public void saveAsExcel() {
-        Workbook workbook = new XSSFWorkbook();
-        Sheet sheet = workbook.createSheet("Chart Data");
-
-        // Get data from chart series
-        ObservableList<Series<Double, Double>> chartData = chart.getData();
-
-        int rowNum = 0;
-        for (Series<Double, Double> series : chartData) {
-            Row rowName = sheet.createRow(rowNum);
-            rowName.createCell(0).setCellValue(series.getName());
-
-            int colNum = 1;
-            for (Data<Double, Double> data : series.getData()) {
-                Row rowData = sheet.getRow(++rowNum) != null ? sheet.getRow(rowNum) : sheet.createRow(rowNum);
-                rowData.createCell(0).setCellValue(data.getXValue());  // Assuming X value is the same for all series
-
-                rowData.createCell(colNum++).setCellValue(data.getYValue());
-            }
-
-            // Reset rowNum for the next series
-            rowNum = 0;
-        }
-
-        // Create a FileChooser
-        FileChooser fileChooser = new FileChooser();
-        fileChooser.setTitle("Zapisz jako arkusz kalkulacyjny");
-        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Arkusz kalkulacyjny", "*.xlsx"));
-        fileChooser.setInitialFileName("DaneWylewów.xlsx");
-
-        // Show save file dialog
-        File file = fileChooser.showSaveDialog(new Stage());
-
-        if (file != null) {
-            // Write the workbook to the chosen file
-            try (FileOutputStream fileOut = new FileOutputStream(file)) {
-                workbook.write(fileOut);
-                System.out.println("Excel file has been saved!");
-            } catch (IOException e) {
-                e.printStackTrace();
-                System.out.println("Error occurred while saving Excel file.");
-            } finally {
-                try {
-                    workbook.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-    }
     public void saveAsExel(){
         Workbook workbook = new XSSFWorkbook();
         Sheet sheet = workbook.createSheet("Dane wykresu");
 
-        // Get data from chart series
         ObservableList<Series<Double, Double>> chartData = chart.getData();
 
         int rowNum = 0;
@@ -311,23 +260,20 @@ public class MainController implements Initializable {
             }
         }
 
-        // Create a FileChooser
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Zapisz jako arkusz kalkulacyjny");
         fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Arkusz kalkulacyjny", "*.xlsx"));
         fileChooser.setInitialFileName("DaneWylewów.xlsx");
 
-        // Show save file dialog
         File file = fileChooser.showSaveDialog(new Stage());
 
         if (file != null) {
-            // Write the workbook to the chosen file
             try (FileOutputStream fileOut = new FileOutputStream(file)) {
                 workbook.write(fileOut);
-                System.out.println("Excel file has been saved!");
+                System.out.println("Pilk exela utworzony!");
             } catch (IOException e) {
                 e.printStackTrace();
-                System.out.println("Error occurred while saving Excel file.");
+                System.out.println("Error :)");
             } finally {
                 try {
                     workbook.close();
