@@ -254,17 +254,24 @@ public class MainController implements Initializable {
         List<String> seriesToRemove = Arrays.asList("0.2", "0.8");
         chartData.removeIf(series -> seriesToRemove.contains(series.getName()));
 
-        //make row with series names
-        Row firstrow = sheet.createRow(0);
-        int seriesNum = 0;
-        for(Series<Double, Double> series : chartData) {
-            firstrow.createCell(seriesNum).setCellValue(series.getName());
-            seriesNum++;
+        // Make row with x-axis values
+        Row headerRow = sheet.createRow(0);
+        headerRow.createCell(0).setCellValue(chart.getXAxis().getLabel());
+        int rowNum = 1;
+        for (Data<Double, Double> data : chartData.get(0).getData()) {
+            Row row = sheet.getRow(rowNum);
+            if (row == null) {
+                row = sheet.createRow(rowNum);
+            }
+            row.createCell(0).setCellValue(data.getXValue());
+            rowNum++;
         }
 
-        int colNum = 0;
+        // Make rows with y-axis values
+        int colNum = 1;
         for (Series<Double, Double> series : chartData) {
-            int rowNum = 1;
+            headerRow.createCell(colNum).setCellValue(series.getName());
+            rowNum = 1;
             for (Data<Double, Double> data : series.getData()) {
                 Row row = sheet.getRow(rowNum);
                 if (row == null) {
@@ -286,7 +293,7 @@ public class MainController implements Initializable {
         if (file != null) {
             try (FileOutputStream fileOut = new FileOutputStream(file)) {
                 workbook.write(fileOut);
-                System.out.println("Pilk exela utworzony!");
+                System.out.println("Pilk Excela utworzony!");
             } catch (IOException e) {
                 e.printStackTrace();
                 System.out.println("Error :)");
@@ -299,6 +306,7 @@ public class MainController implements Initializable {
             }
         }
     }
+
 
     public void saveAsCSV() {
         char rowDelimiter = ';';
@@ -317,23 +325,29 @@ public class MainController implements Initializable {
 
         if (file != null) {
             try (BufferedWriter writer = new BufferedWriter(new FileWriter(file))) {
-                //make row with series names
+                // Make header row with series names
+                writer.write(chartData.get(0).getName() + rowDelimiter); // x-axis name
                 for (Series<Double, Double> series : chartData) {
-                    writer.write(series.getName() + rowDelimiter);
+                    writer.write(series.getName() + rowDelimiter); // y-axis names
                 }
                 writer.newLine();
 
-                //make rows with series data
+                // Make rows with x-axis and y-axis values
                 int maxDataPoints = chartData.stream().mapToInt(series -> series.getData().size()).max().orElse(0);
                 for (int i = 0; i < maxDataPoints; i++) {
+                    // x-axis values
+                    Data<Double, Double> xData = chartData.get(0).getData().get(i);
+                    writer.write(xData.getXValue() + Character.toString(rowDelimiter));
+
+                    // y-axis values
                     for (Series<Double, Double> series : chartData) {
-                        Data<Double, Double> data = series.getData().get(i);
-                        writer.write(data.getYValue() + Character.toString(rowDelimiter));
+                        Data<Double, Double> yData = series.getData().get(i);
+                        writer.write(yData.getYValue() + Character.toString(rowDelimiter));
                     }
                     writer.newLine();
                 }
 
-                System.out.println("Plik CSV utworzony!");
+                System.out.println("Pilk CSV utworzony!");
             } catch (IOException e) {
                 e.printStackTrace();
                 System.out.println("Error :)");
